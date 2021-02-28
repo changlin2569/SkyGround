@@ -5,18 +5,28 @@
         <img src="../assets/logo.png" alt="" />
       </div>
       <div class="form">
-        <el-form ref="loginFormRef" :rules="loginFormRules" :model="loginForm" label-width="100px">
-          <el-form-item label="用户名：" prop="name">
-            <el-input v-model="loginForm.name"></el-input>
+        <el-form
+          ref="loginFormRef"
+          :rules="loginFormRules"
+          :model="loginForm"
+          label-width="100px"
+        >
+          <el-form-item label="手机号：" prop="phone">
+            <el-input v-model="loginForm.phone"></el-input>
           </el-form-item>
-          <el-form-item label="密码：" prop="password">
-            <el-input v-model="loginForm.password" type="password"></el-input>
+          <el-form-item label="验证码：" prop="noteCode">
+            <el-input v-model="loginForm.noteCode">
+              <el-button slot="append" :disabled="noteCodeBtn"
+              @click="getNoteCode"
+                >{{noteCodeValue}}</el-button
+              >
+            </el-input>
           </el-form-item>
         </el-form>
       </div>
       <div class="button_container">
-          <el-button type="primary">登录</el-button>
-          <el-button type="info">注册</el-button>
+        <el-button type="primary">登录</el-button>
+        <el-button type="info">注册</el-button>
       </div>
     </div>
   </div>
@@ -27,18 +37,46 @@ export default {
   data () {
     return {
       loginForm: {
-        name: 'admin',
-        password: 123456
+        phone: '',
+        noteCode: ''
       },
       loginFormRules: {
-        name: [
-          { required: true, message: '请输入用户名', trigger: 'blur' },
-          { min: 3, max: 6, message: '长度在 3 到 6 个字符', trigger: 'blur' }
+        phone: [
+          { required: true, message: '请输入手机号', trigger: 'blur' }
         ],
-        password: [
-          { required: true, message: '请输入密码', trigger: 'blur' },
-          { min: 6, max: 12, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+        noteCode: [
+          { required: true, message: '请输入验证码', trigger: 'blur' }
         ]
+      },
+      // 控制发送验证码按钮的禁用
+      noteCodeBtn: false,
+      // 验证码按钮文本
+      noteCodeValue: '获取验证码',
+      wait: 60
+    }
+  },
+  methods: {
+    getNoteCode () {
+      const reg = /^1[3|4|5|7|8][0-9]{9}$/
+      if (!reg.test(this.loginForm.phone)) {
+        this.$message.error('请输入正确的手机号码')
+        return false
+      }
+      this.noteCodeBtn = true
+      this.getNoteCodeHandle()
+      this.$message.success('验证码已发送')
+    },
+    getNoteCodeHandle () {
+      if (this.wait > 0) {
+        this.wait--
+        this.noteCodeValue = `重新获取${this.wait}`
+        setTimeout(() => {
+          this.getNoteCodeHandle()
+        }, 1000)
+      } else {
+        this.noteCodeBtn = false
+        this.noteCodeValue = '获取验证码'
+        this.wait = 60
       }
     }
   }
@@ -75,17 +113,17 @@ export default {
     }
   }
   .form {
-      position: absolute;
-      height: 100px;
-      top: 70px;
+    position: absolute;
+    height: 100px;
+    top: 70px;
   }
   .el-form {
-      width: 350px;
+    width: 350px;
   }
   .button_container {
-      position: absolute;
-      bottom: 50px;
-      right: 50px;
+    position: absolute;
+    bottom: 50px;
+    right: 50px;
   }
 }
 </style>
